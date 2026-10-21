@@ -1,13 +1,9 @@
 export type Lang = 'en' | 'hu'
 
-export type DurationMode = 'auto' | 'manual'
-
 export interface Prompt {
   id: number
   text: string
   explicit: boolean
-  durationMode: DurationMode
-  manualDuration?: number
 }
 
 export interface Pack {

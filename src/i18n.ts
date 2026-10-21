@@ -12,21 +12,23 @@ export const en = {
   'paste.description':
     'One prompt per line. <BLANK> and formatting tags are kept exactly as written.',
   'paste.placeholder': 'Paste your prompt list here, one prompt per line…',
-  'paste.replace': 'Replace list',
   'paste.append': 'Append',
+  'paste.import': 'Import content.zip',
+  'paste.importing': 'Reading ZIP…',
+  'paste.importConfirm': 'Importing will replace the current prompts. Continue?',
   'paste.hint': 'Blank lines are ignored. Leading and trailing whitespace is trimmed.',
   'paste.empty': 'Paste at least one prompt first.',
 
   'prompts.title': 'Prompts',
   'prompts.count': '{count} total',
   'prompts.add': 'Add prompt',
+  'prompts.clear': 'Clear draft',
+  'prompts.clearConfirm': 'Clear the whole draft? This cannot be undone.',
   'prompts.emptyTitle': 'No prompts yet',
   'prompts.emptyBody': 'Paste a list above, or add a prompt manually.',
   'prompts.charCount': '{count} chars',
   'prompts.blankCount': '{count} <BLANK>',
   'prompts.duration': 'Duration',
-  'prompts.auto': 'Auto',
-  'prompts.manual': 'Manual',
   'prompts.seconds': 's',
   'prompts.remove': 'Remove',
   'prompts.warning': 'Warning',
@@ -41,12 +43,7 @@ export const en = {
   'settings.speedNormal': 'Normal — 18 chars/s',
   'settings.speedFast': 'Fast — 22 chars/s',
   'settings.speedHint':
-    'Used for automatic durations. Manual overrides stay fixed. The longest original prompt is 121 characters.',
-  'settings.audioTitle': 'Audio',
-  'settings.audioDescription':
-    'Every prompt gets a silent OGG Vorbis file. Quiplash 1 ignores MP3 prompt audio.',
-  'settings.audioNote':
-    'The silence gives the prompt time on screen. If the game cuts long audio short, lower the durations or use shorter prompts.',
+    'Used for automatic durations. The longest original prompt is 121 characters.',
   'settings.advanced': 'Advanced',
   'settings.episode': 'Episode ID',
   'settings.episodeHint': 'Preserved from imported packs. 1234 for new packs. Usually not important.',
@@ -61,24 +58,18 @@ export const en = {
   'issues.general': 'Pack',
   'issues.more': 'and {count} more…',
 
-  'export.title': 'Import & export',
+  'export.title': 'Export',
   'export.description':
     'Exports a Quiplash 1 content folder with manifest.jet, Question.jet, data.jet and silent OGG prompt audio.',
   'export.button': 'Export content.zip',
   'export.busy': 'Building ZIP…',
-  'export.import': 'Import content.zip',
-  'export.importing': 'Reading ZIP…',
   'export.ready': 'Ready to export.',
   'export.noPrompts': 'Add prompts before exporting.',
-  'export.summary': 'Prompts: {prompts} · Warnings: {warnings} · Errors: {errors}',
+  'export.summary': 'Prompts: {prompts}',
   'export.installTitle': 'Install',
   'export.install':
     'Back up the game’s content folder, then extract content.zip into the Quiplash folder so its content/ replaces the old one.',
   'export.installNote': 'Close the game before replacing files.',
-  'export.clear': 'Clear draft',
-  'export.clearConfirm': 'Clear the whole draft? This cannot be undone.',
-  'export.replaceConfirm':
-    'Importing will replace the current prompts. Continue?',
 
   'import.title': 'Import summary',
   'import.prompts': 'Prompts imported: {count}.',
@@ -96,19 +87,6 @@ export const en = {
   'import.audioIgnored': 'Audio from the ZIP was ignored; silent OGG will be generated.',
   'import.close': 'Dismiss',
 
-  'help.title': 'Notes',
-  'help.installTitle': 'Installing',
-  'help.install':
-    'The ZIP contains a top-level content/ folder. Replace the game’s content/ folder with it. Keep a backup of the original folder.',
-  'help.audioTitle': 'Why OGG?',
-  'help.audio':
-    'Quiplash 1’s content loader appends its configured audio extension (.ogg) to the PromptAudio name. MP3 files are not found, so prompt audio must be OGG Vorbis.',
-  'help.formatTitle': 'Output format',
-  'help.format':
-    'Each prompt has content/Question/<id>/data.jet and <id>.ogg. The Question.jet uses the original field order and the data.jet contains no FX-style Custom field.',
-  'help.fan': 'Fan-made tool. No game assets included. Not affiliated with Jackbox Games.',
-
-  'status.listLoaded': 'Loaded prompts: {count}.',
   'status.listAppended': 'Added prompts: {count}.',
   'status.noPaste': 'Paste at least one prompt first.',
   'status.cleared': 'Draft cleared.',
@@ -157,21 +135,23 @@ export const hu: Record<TKey, string> = {
   'paste.description':
     'Soronként egy prompt. A <BLANK> és a formázó tagek pontosan úgy maradnak, ahogy beírtad.',
   'paste.placeholder': 'Illeszd be a promptlistát, soronként egy promptot…',
-  'paste.replace': 'Lista cseréje',
   'paste.append': 'Hozzáadás',
+  'paste.import': 'content.zip importálása',
+  'paste.importing': 'ZIP olvasása…',
+  'paste.importConfirm': 'Az importálás lecseréli a jelenlegi promptokat. Folytatod?',
   'paste.hint': 'Az üres sorok kimaradnak. A sorok elejéről és végéről a szóközök lekerülnek.',
   'paste.empty': 'Előbb illessz be legalább egy promptot.',
 
   'prompts.title': 'Promptok',
   'prompts.count': '{count} összesen',
   'prompts.add': 'Prompt hozzáadása',
+  'prompts.clear': 'Piszkozat törlése',
+  'prompts.clearConfirm': 'Törlöd az egész piszkozatot? Ez nem vonható vissza.',
   'prompts.emptyTitle': 'Még nincs prompt',
   'prompts.emptyBody': 'Illessz be egy listát fent, vagy adj hozzá egy promptot.',
   'prompts.charCount': '{count} karakter',
   'prompts.blankCount': '{count} <BLANK>',
   'prompts.duration': 'Hossz',
-  'prompts.auto': 'Auto',
-  'prompts.manual': 'Kézi',
   'prompts.seconds': 'mp',
   'prompts.remove': 'Törlés',
   'prompts.warning': 'Figyelmeztetés',
@@ -186,12 +166,7 @@ export const hu: Record<TKey, string> = {
   'settings.speedNormal': 'Normál — 18 karakter/mp',
   'settings.speedFast': 'Gyors — 22 karakter/mp',
   'settings.speedHint':
-    'Az automatikus hosszhoz használjuk. A kézi beállítások nem változnak. A leghosszabb eredeti prompt 121 karakter.',
-  'settings.audioTitle': 'Hang',
-  'settings.audioDescription':
-    'Minden prompt néma OGG Vorbis fájlt kap. A Quiplash 1 figyelmen kívül hagyja az MP3 prompt-hangot.',
-  'settings.audioNote':
-    'A csend ad időt a promptnak a képernyőn. Ha a játék levágja a hosszú hangot, csökkentsd a hosszokat, vagy használj rövidebb promptokat.',
+    'Az automatikus hosszhoz használjuk. A leghosszabb eredeti prompt 121 karakter.',
   'settings.advanced': 'Speciális',
   'settings.episode': 'Epizód ID',
   'settings.episodeHint':
@@ -207,24 +182,18 @@ export const hu: Record<TKey, string> = {
   'issues.general': 'Csomag',
   'issues.more': 'és még {count}…',
 
-  'export.title': 'Import és export',
+  'export.title': 'Exportálás',
   'export.description':
     'Quiplash 1 tartalommappát exportál: manifest.jet, Question.jet, data.jet és néma OGG prompt-hang.',
   'export.button': 'content.zip exportálása',
   'export.busy': 'ZIP készítése…',
-  'export.import': 'content.zip importálása',
-  'export.importing': 'ZIP olvasása…',
   'export.ready': 'Készen áll az exportra.',
   'export.noPrompts': 'Exportálás előtt adj hozzá promptokat.',
-  'export.summary': 'Promptok: {prompts} · Figyelmeztetések: {warnings} · Hibák: {errors}',
+  'export.summary': 'Promptok: {prompts}',
   'export.installTitle': 'Telepítés',
   'export.install':
     'Készíts biztonsági másolatot a játék content mappájáról, majd bontsd ki a content.zip-et a Quiplash mappába úgy, hogy a benne lévő content/ lecserélje a régit.',
   'export.installNote': 'Fájlok cseréje előtt zárd be a játékot.',
-  'export.clear': 'Piszkozat törlése',
-  'export.clearConfirm': 'Törlöd az egész piszkozatot? Ez nem vonható vissza.',
-  'export.replaceConfirm':
-    'Az importálás lecseréli a jelenlegi promptokat. Folytatod?',
 
   'import.title': 'Import összefoglaló',
   'import.prompts': 'Importált promptok: {count}.',
@@ -242,20 +211,6 @@ export const hu: Record<TKey, string> = {
   'import.audioIgnored': 'A ZIP-ben lévő hangot figyelmen kívül hagytuk; néma OGG készül.',
   'import.close': 'Bezárás',
 
-  'help.title': 'Megjegyzések',
-  'help.installTitle': 'Telepítés',
-  'help.install':
-    'A ZIP egy content/ mappát tartalmaz a gyökérben. Cseréld le vele a játék content/ mappáját. Őrizd meg az eredeti mappa biztonsági másolatát.',
-  'help.audioTitle': 'Miért OGG?',
-  'help.audio':
-    'A Quiplash 1 tartalombetöltője a beállított hangkiterjesztést (.ogg) fűzi a PromptAudio nevéhez. Az MP3 fájlokat nem találja, ezért a prompt-hangnak OGG Vorbisnak kell lennie.',
-  'help.formatTitle': 'Kimeneti formátum',
-  'help.format':
-    'Minden prompt kap egy content/Question/<id>/data.jet és <id>.ogg fájlt. A Question.jet az eredeti mezősorrendet használja, a data.jet pedig nem tartalmaz FX-es Custom mezőt.',
-  'help.fan':
-    'Rajongói eszköz. Nem tartalmaz játékfájlokat. Nem áll kapcsolatban a Jackbox Games-szel.',
-
-  'status.listLoaded': 'Betöltött promptok: {count}.',
   'status.listAppended': 'Hozzáadott promptok: {count}.',
   'status.noPaste': 'Előbb illessz be legalább egy promptot.',
   'status.cleared': 'Piszkozat törölve.',

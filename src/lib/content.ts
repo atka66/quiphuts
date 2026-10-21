@@ -6,7 +6,7 @@ import {
   DEFAULT_EPISODE_ID,
   DEFAULT_PACK_NAME,
   FIRST_PROMPT_ID,
-  getPromptDuration,
+  autoDurationForPrompt,
 } from './prompts'
 
 export type ContentErrorCode =
@@ -58,7 +58,7 @@ export async function exportContentZip(pack: Pack): Promise<Uint8Array> {
   }
 
   for (const prompt of pack.prompts) {
-    const duration = getPromptDuration(prompt, pack.speed)
+    const duration = autoDurationForPrompt(prompt.text, pack.speed)
     files[audioPathForPrompt(prompt)] = await fetchAudioAsset(duration)
   }
 
@@ -155,7 +155,6 @@ export function importContentZip(bytes: Uint8Array): ImportSummary {
       id,
       text: item.text,
       explicit: item.explicit,
-      durationMode: 'auto',
     }
   })
 

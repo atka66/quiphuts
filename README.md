@@ -3,8 +3,8 @@
 Turn a pasted list of prompts into a valid **Quiplash 1** content pack.
 
 quiphuts is a small static web app. Paste one prompt per line, review the automatic
-or manual prompt durations, and export a `content.zip` that the original game can
-read. The UI is available in English and Hungarian.
+prompt durations, and export a `content.zip` that the original game can read.
+The UI is available in English and Hungarian.
 
 > Fan-made tool. It contains no game assets and is not affiliated with Jackbox Games.
 
@@ -17,10 +17,9 @@ read. The UI is available in English and Hungarian.
   - `content/Question.jet`
   - `content/Question/<id>/data.jet`
   - `content/Question/<id>/<id>.ogg`
-- Per-prompt audio duration:
-  - automatic reading-time calculation from visible prompt length
-  - three speed presets (14, 18 or 22 characters/second)
-  - manual half-second overrides
+- Automatic prompt audio duration:
+  - reading-time calculation from visible prompt length
+  - three speed presets (14, 18 or 22 characters/second) in Advanced settings
 - Silent OGG Vorbis prompt audio, generated locally from pre-built assets.
 - Validation warnings for unsupported characters, duplicate prompts, unknown tags,
   lowercase blanks, oversized prompts and blank-like placeholders.

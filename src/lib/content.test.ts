@@ -63,7 +63,6 @@ describe('importContentZip', () => {
       id: 1001,
       text: 'First',
       explicit: false,
-      durationMode: 'auto',
     })
     expect(result.prompts[1]).toMatchObject({
       id: 1002,

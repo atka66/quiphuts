@@ -13,13 +13,11 @@ import {
   DEFAULT_PACK_NAME,
   FIRST_PROMPT_ID,
   SPEEDS,
+  autoDurationForPrompt,
   createDefaultPack,
-  getPromptDuration,
   makePrompt,
   nextPromptId,
   parsePromptList,
-  promptsFromText,
-  roundDuration,
   speedFromStorage,
 } from './lib/prompts'
 import { countIssues, validatePack } from './lib/validation'
@@ -60,17 +58,10 @@ function loadPack(): Pack {
       .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object')
       .map((entry, index) => {
         const id = Number(entry.id)
-        const rawDuration = Number(entry.manualDuration)
-        const durationMode = entry.durationMode === 'manual' ? 'manual' : 'auto'
         return {
           id: Number.isInteger(id) && id > 0 ? id : FIRST_PROMPT_ID + index,
           text: typeof entry.text === 'string' ? entry.text : '',
           explicit: Boolean(entry.explicit),
-          durationMode,
-          manualDuration:
-            durationMode === 'manual' && Number.isFinite(rawDuration)
-              ? roundDuration(rawDuration)
-              : undefined,
         }
       })
 
@@ -167,22 +158,6 @@ export default function App() {
     }))
   }
 
-  const handleReplaceList = () => {
-    const prompts = promptsFromText(pasteText)
-    if (prompts.length === 0) {
-      setStatus({ kind: 'error', key: 'status.noPaste' })
-      return
-    }
-    setPack((previous) => ({ ...previous, prompts }))
-    setImportSummary(null)
-    setStatus({
-      kind: 'success',
-      key: 'status.listLoaded',
-      params: { count: prompts.length },
-    })
-    setPasteText('')
-  }
-
   const handleAppendList = () => {
     const lines = parsePromptList(pasteText)
     if (lines.length === 0) {
@@ -216,18 +191,8 @@ export default function App() {
     setImportSummary(null)
   }
 
-  const handleDurationChange = (id: number, rawValue: string) => {
-    if (rawValue.trim() === '') {
-      updatePrompt(id, { durationMode: 'auto', manualDuration: undefined })
-      return
-    }
-    const value = Number(rawValue)
-    if (!Number.isFinite(value)) return
-    updatePrompt(id, { durationMode: 'manual', manualDuration: roundDuration(value) })
-  }
-
   const handleClear = () => {
-    if (!window.confirm(t('export.clearConfirm'))) return
+    if (!window.confirm(t('prompts.clearConfirm'))) return
     setPack((previous) => ({ ...createDefaultPack(), speed: previous.speed }))
     setImportSummary(null)
     setPasteText('')
@@ -243,7 +208,7 @@ export default function App() {
     event.currentTarget.value = ''
     if (!file) return
 
-    if (pack.prompts.length > 0 && !window.confirm(t('export.replaceConfirm'))) {
+    if (pack.prompts.length > 0 && !window.confirm(t('paste.importConfirm'))) {
       return
     }
 
@@ -340,10 +305,13 @@ export default function App() {
 
           <PasteCard
             value={pasteText}
+            busy={busy}
             t={t}
+            fileInputRef={fileInputRef}
             onChange={setPasteText}
-            onReplace={handleReplaceList}
             onAppend={handleAppendList}
+            onImportClick={handleImportClick}
+            onFileChange={handleFileChange}
           />
 
           <PromptList
@@ -351,9 +319,8 @@ export default function App() {
             issues={issues}
             t={t}
             onAdd={handleAddPrompt}
+            onClear={handleClear}
             onChangeText={(id, text) => updatePrompt(id, { text })}
-            onChangeDuration={handleDurationChange}
-            onAuto={(id) => updatePrompt(id, { durationMode: 'auto', manualDuration: undefined })}
             onRemove={(id) =>
               setPack((previous) => ({
                 ...previous,
@@ -374,21 +341,15 @@ export default function App() {
             }
           />
 
+          <IssuesCard issues={issues} counts={counts} t={t} />
+
           <ExportCard
             pack={pack}
             counts={counts}
             busy={busy}
             t={t}
-            fileInputRef={fileInputRef}
             onExport={handleExport}
-            onImportClick={handleImportClick}
-            onFileChange={handleFileChange}
-            onClear={handleClear}
           />
-
-          <IssuesCard issues={issues} counts={counts} t={t} />
-
-          <HelpCard t={t} />
         </aside>
       </main>
 
@@ -465,16 +426,22 @@ function StatusBanner({
 
 function PasteCard({
   value,
+  busy,
   t,
+  fileInputRef,
   onChange,
-  onReplace,
   onAppend,
+  onImportClick,
+  onFileChange,
 }: {
   value: string
+  busy: 'import' | 'export' | null
   t: T
+  fileInputRef: RefObject<HTMLInputElement | null>
   onChange: (value: string) => void
-  onReplace: () => void
   onAppend: () => void
+  onImportClick: () => void
+  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
 }) {
   return (
     <section className="card">
@@ -493,12 +460,25 @@ function PasteCard({
         spellCheck={false}
       />
       <div className="button-row">
-        <button type="button" className="button primary" onClick={onReplace}>
-          {t('paste.replace')}
-        </button>
-        <button type="button" className="button secondary" onClick={onAppend}>
+        <button type="button" className="button primary" onClick={onAppend}>
           {t('paste.append')}
         </button>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={onImportClick}
+          disabled={busy !== null}
+        >
+          {busy === 'import' ? t('paste.importing') : t('paste.import')}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".zip,application/zip"
+          className="visually-hidden"
+          onChange={onFileChange}
+          tabIndex={-1}
+        />
       </div>
       <p className="hint">{t('paste.hint')}</p>
     </section>
@@ -510,18 +490,16 @@ function PromptList({
   issues,
   t,
   onAdd,
+  onClear,
   onChangeText,
-  onChangeDuration,
-  onAuto,
   onRemove,
 }: {
   pack: Pack
   issues: Issue[]
   t: T
   onAdd: () => void
+  onClear: () => void
   onChangeText: (id: number, text: string) => void
-  onChangeDuration: (id: number, value: string) => void
-  onAuto: (id: number) => void
   onRemove: (id: number) => void
 }) {
   return (
@@ -531,9 +509,14 @@ function PromptList({
           <h2>{t('prompts.title')}</h2>
           <p>{t('prompts.count', { count: pack.prompts.length })}</p>
         </div>
-        <button type="button" className="button secondary compact" onClick={onAdd}>
-          + {t('prompts.add')}
-        </button>
+        <div className="heading-actions">
+          <button type="button" className="button secondary compact" onClick={onAdd}>
+            + {t('prompts.add')}
+          </button>
+          <button type="button" className="text-button danger-text" onClick={onClear}>
+            {t('prompts.clear')}
+          </button>
+        </div>
       </div>
 
       {pack.prompts.length === 0 ? (
@@ -557,8 +540,6 @@ function PromptList({
                 promptIssues={promptIssues}
                 t={t}
                 onChangeText={onChangeText}
-                onChangeDuration={onChangeDuration}
-                onAuto={onAuto}
                 onRemove={onRemove}
               />
             )
@@ -576,8 +557,6 @@ function PromptRow({
   promptIssues,
   t,
   onChangeText,
-  onChangeDuration,
-  onAuto,
   onRemove,
 }: {
   prompt: Prompt
@@ -586,14 +565,12 @@ function PromptRow({
   promptIssues: Issue[]
   t: T
   onChangeText: (id: number, text: string) => void
-  onChangeDuration: (id: number, value: string) => void
-  onAuto: (id: number) => void
   onRemove: (id: number) => void
 }) {
   const errorCount = promptIssues.filter((issue) => issue.severity === 'error').length
   const warningCount = promptIssues.filter((issue) => issue.severity === 'warning').length
   const issueTitle = promptIssues.map((issue) => issueText(issue, t)).join('\n')
-  const durationValue = getPromptDuration(prompt, speed).toFixed(1)
+  const duration = autoDurationForPrompt(prompt.text, speed)
   const blankCount = prompt.text.match(/<BLANK>/g)?.length ?? 0
 
   return (
@@ -625,30 +602,8 @@ function PromptRow({
               {warningCount > 1 ? ` ${warningCount}` : ''}
             </span>
           ) : null}
-          <span className="duration-control">
-            <label htmlFor={`duration-${prompt.id}-${index}`}>{t('prompts.duration')}</label>
-            <input
-              id={`duration-${prompt.id}-${index}`}
-              type="number"
-              min={1}
-              max={15}
-              step={0.5}
-              value={durationValue}
-              onChange={(event) => onChangeDuration(prompt.id, event.target.value)}
-            />
-            <span className="unit">{t('prompts.seconds')}</span>
-            <button
-              type="button"
-              className={`auto-toggle ${prompt.durationMode === 'auto' ? 'is-active' : ''}`}
-              aria-pressed={prompt.durationMode === 'auto'}
-              onClick={() => onAuto(prompt.id)}
-              title={t('prompts.auto')}
-            >
-              {t('prompts.auto')}
-            </button>
-            <span className="mode-label">
-              {prompt.durationMode === 'manual' ? t('prompts.manual') : ''}
-            </span>
+          <span className="duration-display" title={t('prompts.duration')}>
+            {duration.toFixed(1)} {t('prompts.seconds')}
           </span>
         </div>
       </div>
@@ -693,8 +648,9 @@ function SettingsCard({
         />
       </label>
 
-      <div className="subsection">
-        <h3>{t('settings.durationTitle')}</h3>
+      <details className="advanced">
+        <summary>{t('settings.advanced')}</summary>
+        <h3 className="advanced-title">{t('settings.durationTitle')}</h3>
         <label className="field">
           <span>{t('settings.speed')}</span>
           <select
@@ -709,16 +665,6 @@ function SettingsCard({
           </select>
         </label>
         <p className="hint">{t('settings.speedHint')}</p>
-      </div>
-
-      <div className="audio-box">
-        <h3>{t('settings.audioTitle')}</h3>
-        <p>{t('settings.audioDescription')}</p>
-        <p className="hint">{t('settings.audioNote')}</p>
-      </div>
-
-      <details className="advanced">
-        <summary>{t('settings.advanced')}</summary>
         <label className="field">
           <span>{t('settings.episode')}</span>
           <input
@@ -745,21 +691,13 @@ function ExportCard({
   counts,
   busy,
   t,
-  fileInputRef,
   onExport,
-  onImportClick,
-  onFileChange,
-  onClear,
 }: {
   pack: Pack
   counts: { errors: number; warnings: number }
   busy: 'import' | 'export' | null
   t: T
-  fileInputRef: RefObject<HTMLInputElement | null>
   onExport: () => void
-  onImportClick: () => void
-  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
-  onClear: () => void
 }) {
   const disabled = busy !== null
 
@@ -768,11 +706,7 @@ function ExportCard({
       <h2>{t('export.title')}</h2>
       <p>{t('export.description')}</p>
       <p className="export-summary">
-        {t('export.summary', {
-          prompts: pack.prompts.length,
-          warnings: counts.warnings,
-          errors: counts.errors,
-        })}
+        {t('export.summary', { prompts: pack.prompts.length })}
       </p>
       <p className={counts.errors > 0 ? 'bad-text' : 'good-text'}>
         {counts.errors > 0
@@ -791,22 +725,6 @@ function ExportCard({
         >
           {busy === 'export' ? t('export.busy') : t('export.button')}
         </button>
-        <button
-          type="button"
-          className="button secondary"
-          onClick={onImportClick}
-          disabled={disabled}
-        >
-          {busy === 'import' ? t('export.importing') : t('export.import')}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".zip,application/zip"
-          className="visually-hidden"
-          onChange={onFileChange}
-          tabIndex={-1}
-        />
       </div>
 
       <div className="install-note">
@@ -814,10 +732,6 @@ function ExportCard({
         <p>{t('export.install')}</p>
         <p className="hint">{t('export.installNote')}</p>
       </div>
-
-      <button type="button" className="text-button danger-text" onClick={onClear}>
-        {t('export.clear')}
-      </button>
     </section>
   )
 }
@@ -929,27 +843,6 @@ function ImportSummaryCard({
           <li key={`${item.key}-${index}`}>{t(item.key, item.params)}</li>
         ))}
       </ul>
-    </section>
-  )
-}
-
-function HelpCard({ t }: { t: T }) {
-  return (
-    <section className="card help-card">
-      <h2>{t('help.title')}</h2>
-      <details open>
-        <summary>{t('help.installTitle')}</summary>
-        <p>{t('help.install')}</p>
-      </details>
-      <details>
-        <summary>{t('help.audioTitle')}</summary>
-        <p>{t('help.audio')}</p>
-      </details>
-      <details>
-        <summary>{t('help.formatTitle')}</summary>
-        <p>{t('help.format')}</p>
-      </details>
-      <p className="fan-note">{t('help.fan')}</p>
     </section>
   )
 }

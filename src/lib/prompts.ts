@@ -39,19 +39,11 @@ export function autoDurationForPrompt(text: string, speed: number): number {
   return roundDuration(clamp(1 + visibleLength(text) / safeSpeed, 1.5, MAX_DURATION))
 }
 
-export function getPromptDuration(prompt: Prompt, speed: number): number {
-  if (prompt.durationMode === 'manual' && prompt.manualDuration !== undefined) {
-    return roundDuration(prompt.manualDuration)
-  }
-  return autoDurationForPrompt(prompt.text, speed)
-}
-
 export function makePrompt(id: number, text = ''): Prompt {
   return {
     id,
     text,
     explicit: false,
-    durationMode: 'auto',
   }
 }
 
@@ -61,10 +53,6 @@ export function parsePromptList(text: string): string[] {
     .split(/\r\n|\r|\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
-}
-
-export function promptsFromText(text: string, startId = FIRST_PROMPT_ID): Prompt[] {
-  return parsePromptList(text).map((promptText, index) => makePrompt(startId + index, promptText))
 }
 
 export function nextPromptId(prompts: Prompt[]): number {

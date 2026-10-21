@@ -3,13 +3,11 @@ import {
   DEFAULT_SPEED,
   autoDurationForPrompt,
   getAudioKey,
-  getPromptDuration,
   makePrompt,
   nextPromptId,
   normalizeForDuplicate,
   packNameOrDefault,
   parsePromptList,
-  promptsFromText,
   roundDuration,
   speedFromStorage,
   visibleLength,
@@ -25,11 +23,9 @@ describe('parsePromptList', () => {
     expect(parsePromptList(' \n \r\n ')).toEqual([])
   })
 
-  it('assigns sequential IDs from 1001 by default', () => {
-    const prompts = promptsFromText('One\nTwo')
-    expect(prompts.map((prompt) => prompt.id)).toEqual([1001, 1002])
-    expect(prompts.every((prompt) => prompt.durationMode === 'auto')).toBe(true)
-    expect(prompts.every((prompt) => prompt.explicit === false)).toBe(true)
+  it('creates prompts with auto metadata defaults', () => {
+    const prompt = makePrompt(1001, 'One')
+    expect(prompt).toEqual({ id: 1001, text: 'One', explicit: false })
   })
 })
 
@@ -53,10 +49,9 @@ describe('durations', () => {
     expect(autoDurationForPrompt('A'.repeat(400), 18)).toBe(15)
   })
 
-  it('keeps manual overrides until switched back to auto', () => {
-    const prompt = { ...makePrompt(1001, 'A short prompt'), durationMode: 'manual' as const, manualDuration: 7.7 }
-    expect(getPromptDuration(prompt, 18)).toBe(7.5)
-    expect(getPromptDuration({ ...prompt, durationMode: 'auto' }, 18)).toBe(2)
+  it('keeps auto durations consistent with the reading speed', () => {
+    const prompt = makePrompt(1001, 'A short prompt')
+    expect(autoDurationForPrompt(prompt.text, 18)).toBe(2)
   })
 
   it('formats audio asset keys with one decimal place', () => {
